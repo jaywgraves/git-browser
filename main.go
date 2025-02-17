@@ -8,26 +8,38 @@ import (
 	"strings"
 )
 
-const VERSION = "0.0.1"
+const VERSION = "0.0.2"
 
 func main() {
 	remoteName := "origin" // default to "origin"
 	argv := os.Args[1:]
+	show := false
 	if len(argv) > 0 {
 		if argv[0] == "--version" {
 			fmt.Printf("%s\n", VERSION)
 			os.Exit(0)
 		}
-		if strings.HasPrefix(argv[0], "-") {
+		if argv[0] == "--show" {
+			show = true
+			if len(argv) > 1 {
+				remoteName = argv[1]
+			}
+		} else if strings.HasPrefix(argv[0], "-") {
 			fmt.Printf("invalid argument %s\n", argv[0])
 			os.Exit(1)
+		} else {
+			remoteName = argv[0]
 		}
-		remoteName = argv[0]
 	}
 	// this will fail if no remote or not a git repo
 	remote := gitRemote(remoteName)
 	browserUrl := parseRemote(remote)
-	openBrowser(browserUrl)
+	if show {
+		fmt.Printf("%s\n", browserUrl)
+
+	} else {
+		openBrowser(browserUrl)
+	}
 }
 
 func gitRemote(remoteName string) string {
