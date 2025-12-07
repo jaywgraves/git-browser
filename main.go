@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/url"
 	"os"
@@ -11,33 +12,37 @@ import (
 
 const VERSION = "0.0.2"
 
-func main() {
-	remoteName := "origin" // default to "origin"
-	argv := os.Args[1:]
-	show := false
-	if len(argv) > 0 {
-		if argv[0] == "--version" {
-			fmt.Printf("%s\n", VERSION)
-			os.Exit(0)
-		}
-		if argv[0] == "--show" {
-			show = true
-			if len(argv) > 1 {
-				remoteName = argv[1]
-			}
-		} else if strings.HasPrefix(argv[0], "-") {
-			fmt.Printf("invalid argument %s\n", argv[0])
-			os.Exit(1)
-		} else {
-			remoteName = argv[0]
-		}
-	}
-	// this will fail if no remote or not a git repo
-	remote := gitRemote(remoteName)
-	browserUrl := parseRemote(remote)
-	if show {
-		fmt.Printf("%s\n", browserUrl)
+var Usage = func() {
+	fmt.Fprintf(os.Stderr, "This utility is meant to be called as a git subcommand  `git browser`\n")
+	fmt.Fprintf(os.Stderr, "It will build the correct URL for your githost that will open\n")
+	fmt.Fprintf(os.Stderr, "in your default browser automatically.")
+	flag.PrintDefaults()
+}
 
+func main() {
+	showOnlyFlg := flag.Bool("s", false, "show: print the URL to stdout, don't open a browser")
+	branchFlg := flag.Bool("b", false, "branch: use current branch")
+	remoteFlg := flag.String("r", "origin", "remote: choose a remote to open")
+	versionFlg := flag.Bool("v", false, "version: print the current version an exit")
+
+	flag.Usage = Usage
+	flag.Parse()
+
+	if *versionFlg {
+		fmt.Printf("%s\n", VERSION)
+		os.Exit(0)
+	}
+
+	// this will fail if no remote or not a git repo
+	remote := gitRemote(*remoteFlg)
+	browserUrl := parseRemote(remote)
+	if *branchFlg {
+		branch := gitCurrentBranch()
+		browserUrl = makeBranchUrl(browserUrl, branch)
+	}
+
+	if *showOnlyFlg {
+		fmt.Printf("%s\n", browserUrl)
 	} else {
 		openBrowser(browserUrl)
 	}
