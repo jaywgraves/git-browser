@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const VERSION = "0.0.2"
+const VERSION = "0.1.0"
 
 var Usage = func() {
 	fmt.Fprintf(os.Stderr, "This utility is meant to be called as a git subcommand  `git browser`\n")
