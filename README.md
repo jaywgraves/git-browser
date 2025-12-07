@@ -9,6 +9,8 @@ I don't have that issue and have defined these:
 ```
 [alias]
     b = browser
-    bs = browser --show
+    bb = browser -b
+    bs = browser -s
+    bbs = browser -b -s
 ```
 
