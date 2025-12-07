@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -53,6 +54,17 @@ func gitRemote(remoteName string) string {
 	return strings.TrimRight(outStr, "\n")
 }
 
+func gitCurrentBranch() string {
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("Error: failed getting current branch: %v", err)
+		os.Exit(1)
+	}
+	outStr := string(out)
+	return strings.TrimRight(outStr, "\n")
+}
+
 func parseRemote(remoteUrl string) string {
 	// sample ssh clone remote url
 	// git@github.com:<some-profile/<some-repo>.git
@@ -74,6 +86,41 @@ func parseRemote(remoteUrl string) string {
 	}
 
 	return remoteUrl
+}
+
+func codeHostFromUrl(remoteUrl string) string {
+	// it's a bit unclear about when this will actually return
+	// an err.  it's posslbe to just return an empty string for .Host
+	url, err := url.Parse(remoteUrl)
+	if err != nil {
+		fmt.Printf("Error: failed parsing remoteUrl: %v", err)
+		os.Exit(1)
+	}
+	return url.Host
+}
+
+func makeBranchUrl(remoteUrl string, branch string) string {
+	codehost := codeHostFromUrl(remoteUrl)
+
+	var urlFmtString string
+
+	switch codehost {
+	case "github.com":
+		urlFmtString = "%s/tree/%s"
+	case "gitlab.com":
+		urlFmtString = "%s/-tree/%s"
+	case "bitbucket.org":
+		urlFmtString = "%s/src/%s/"
+	default:
+		// just return the remoteURL if we don't recognize the code host
+		return remoteUrl
+	}
+
+	// this should not have a trailing / but make sure so the
+	// fmt strings don't double up the /
+	remoteUrl = strings.TrimSuffix(remoteUrl, "/")
+	return fmt.Sprintf(urlFmtString, remoteUrl, branch)
+
 }
 
 func openBrowser(url string) {
