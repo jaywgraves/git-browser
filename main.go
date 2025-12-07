@@ -63,9 +63,8 @@ func parseRemote(remoteUrl string) string {
 	// should turn into
 	// https://github.com/<some-profile/<some-repo>
 
-	if strings.HasSuffix(remoteUrl, ".git") {
-		remoteUrl = strings.TrimSuffix(remoteUrl, ".git")
-	}
+	remoteUrl = strings.TrimSuffix(remoteUrl, ".git")
+
 	if strings.HasPrefix(remoteUrl, "http") {
 		// http(s) clone, nothing else to do
 	} else if strings.HasPrefix(remoteUrl, "git@") {
