@@ -113,7 +113,7 @@ func makeBranchUrl(remoteUrl string, branch string) string {
 	case "github.com":
 		urlFmtString = "%s/tree/%s"
 	case "gitlab.com":
-		urlFmtString = "%s/-tree/%s"
+		urlFmtString = "%s/-/tree/%s"
 	case "bitbucket.org":
 		urlFmtString = "%s/src/%s/"
 	default:
